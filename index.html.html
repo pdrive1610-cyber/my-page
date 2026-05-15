@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Notepad</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 900px;
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+        }
+
+        .toolbar {
+            background: #2c3e50;
+            color: #fff;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .toolbar h1 {
+            font-size: 20px;
+            font-weight: 500;
+        }
+
+        .buttons {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .buttons button {
+            background: #3498db;
+            color: #fff;
+            border: none;
+            padding: 8px 14px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.2s;
+        }
+
+        .buttons button:hover {
+            background: #2980b9;
+        }
+
+        .buttons button.clear {
+            background: #e74c3c;
+        }
+
+        .buttons button.clear:hover {
+            background: #c0392b;
+        }
+
+        .buttons button.save {
+            background: #27ae60;
+        }
+
+        .buttons button.save:hover {
+            background: #1e8449;
+        }
+
+        textarea {
+            width: 100%;
+            min-height: 70vh;
+            border: none;
+            outline: none;
+            padding: 25px;
+            font-size: 16px;
+            font-family: "Courier New", monospace;
+            line-height: 1.6;
+            resize: vertical;
+            color: #333;
+        }
+
+        .status {
+            background: #ecf0f1;
+            padding: 10px 20px;
+            font-size: 13px;
+            color: #555;
+            display: flex;
+            justify-content: space-between;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="toolbar">
+            <h1>📝 My Notepad</h1>
+            <div class="buttons">
+                <button class="save" onclick="saveNote()">💾 Save</button>
+                <button onclick="downloadNote()">⬇️ Download</button>
+                <button class="clear" onclick="clearNote()">🗑️ Clear</button>
+            </div>
+        </div>
+        <textarea id="notepad" placeholder="Start typing your notes here..." oninput="updateStatus()"></textarea>
+        <div class="status">
+            <span id="charCount">Characters: 0</span>
+            <span id="saveStatus">Auto-saved</span>
+        </div>
+    </div>
+
+    <script>
+        const notepad = document.getElementById('notepad');
+        const charCount = document.getElementById('charCount');
+        const saveStatus = document.getElementById('saveStatus');
+
+        // Load saved content on page load
+        window.addEventListener('load', () => {
+            const saved = localStorage.getItem('notepadContent');
+            if (saved) {
+                notepad.value = saved;
+            }
+            updateStatus();
+        });
+
+        // Auto-save while typing
+        function updateStatus() {
+            const text = notepad.value;
+            charCount.textContent = `Characters: ${text.length}`;
+            localStorage.setItem('notepadContent', text);
+            saveStatus.textContent = 'Auto-saved ✓';
+        }
+
+        // Manual save
+        function saveNote() {
+            localStorage.setItem('notepadContent', notepad.value);
+            saveStatus.textContent = 'Saved ✓ ' + new Date().toLocaleTimeString();
+        }
+
+        // Download as .txt file
+        function downloadNote() {
+            const text = notepad.value;
+            const blob = new Blob([text], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'my-note-' + new Date().toISOString().slice(0,10) + '.txt';
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        // Clear all text
+        function clearNote() {
+            if (confirm('Are you sure you want to clear all text?')) {
+                notepad.value = '';
+                localStorage.removeItem('notepadContent');
+                updateStatus();
+            }
+        }
+    </script>
+</body>
+</html>
